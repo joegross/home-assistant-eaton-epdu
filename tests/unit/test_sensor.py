@@ -80,8 +80,8 @@ class TestSensorNaming:
             oids["current"]: 500,
         }
         sensor = cls(FakeCoordinator(data), UNIT, INDEX)
-        assert sensor._attr_name.startswith("PDU nvr ")
-        assert sensor._attr_name != "PDU nvr"  # suffix present
+        assert sensor._attr_name.startswith("nvr ")
+        assert sensor._attr_name != "nvr"  # suffix present
 
     def test_factory_designator_name(self, cls):
         oids = oids_for(INDEX)
@@ -112,7 +112,7 @@ class TestRenamePropagation:
 
         data[oids["name"]] = "nvr"
         sensor._handle_coordinator_update()
-        assert sensor._attr_name.startswith("PDU nvr ")
+        assert sensor._attr_name.startswith("nvr ")
         assert sensor._attr_unique_id == uid_before
 
     def test_value_survives_rename_cycle(self):

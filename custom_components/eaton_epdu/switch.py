@@ -71,10 +71,9 @@ class SnmpSwitchEntity(SnmpEntity, SwitchEntity):
         )
 
     def _build_name(self) -> None:
-        """Assemble the display name from device name and outlet label."""
-        device_name = self.device_info["name"]
+        """Assemble the short entity name (no device prefix)."""
         outlet_label = self.get_outlet_label(self._index)
-        self._attr_name = f"{device_name} {outlet_label} {self._name_suffix}"
+        self._attr_name = f"{outlet_label} {self._name_suffix}"
 
     @callback
     def _handle_coordinator_update(self) -> None:

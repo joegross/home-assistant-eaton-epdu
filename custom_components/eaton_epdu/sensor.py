@@ -125,12 +125,10 @@ class SnmpSensorEntity(SnmpEntity, SensorEntity):
         super().__init__(coordinator, unit)
         self._name_oid = self._name_oid.replace("unit", unit).replace("index", index)
         self._value_oid = self._value_oid.replace("unit", unit).replace("index", index)
-        device_name = self.device_info["name"]
         sensor_name = self.get_sensor_name(index)
         self._attr_name = " ".join(
             str(component)
             for component in (
-                device_name,
                 self._name_prefix,
                 sensor_name,
                 self._name_suffix,
@@ -239,12 +237,10 @@ class SnmpOutletSensorEntity(SnmpSensorEntity, SensorEntity):
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         # Pick up a rename done on the ePDU web UI without changing entity_id.
-        device_name = self.device_info["name"]
         sensor_name = self.get_sensor_name(self._outlet_index)
         self._attr_name = " ".join(
             str(component)
             for component in (
-                device_name,
                 self._name_prefix,
                 sensor_name,
                 self._name_suffix,
@@ -388,9 +384,8 @@ class SnmpOutputVAPhiSensorEntity(SnmpEntity, SensorEntity):
         self._input_index = input_index
 
         self._name_oid = self._name_oid.replace("unit", unit).replace("index", index)
-        device_name = self.device_info["name"]
         outlet_label = self.get_outlet_label(index)
-        self._attr_name = f"{device_name} {outlet_label} {self._name_suffix}"
+        self._attr_name = f"{outlet_label} {self._name_suffix}"
         self._attr_unique_id = f"{DOMAIN}_{self.identifier}_{self._name_oid}_watts2"
         self._attr_native_value = self.get_value()
 

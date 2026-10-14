@@ -78,7 +78,7 @@ class TestSwitchNaming:
             "index", INDEX
         )
         sw = make_switch({**UNIT_META, STATUS_OID: 1, name_oid: "nvr"})
-        assert sw._attr_name == "PDU nvr Switch"
+        assert sw._attr_name == "nvr Switch"
 
     def test_switch_name_factory_default(self):
         from eaton_epdu.const import SNMP_OID_OUTLETS_DESIGNATOR
@@ -114,7 +114,7 @@ class TestRenamePropagation:
         # rename lands in the data dict, coordinator broadcasts the update
         data[name_oid] = "nvr"
         sw._handle_coordinator_update()
-        assert sw._attr_name == "PDU nvr Switch"
+        assert sw._attr_name == "nvr Switch"
         assert "Outlet A3" not in sw._attr_name
 
     def test_unique_id_stable_across_rename(self):

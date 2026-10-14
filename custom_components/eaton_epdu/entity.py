@@ -24,6 +24,12 @@ from .coordinator import SnmpCoordinator
 class SnmpEntity(CoordinatorEntity[SnmpCoordinator]):
     """Base class for Eaton ePDU entities."""
 
+    # Modern HA naming: the display name is composed from the device name
+    # plus the entity's own short name. Entities must NOT embed the device
+    # name in _attr_name or the frontend double-prefixes it (name becomes
+    # e.g. "PDU1 PDU nvr Switch" for a device renamed to "PDU1").
+    _attr_has_entity_name = True
+
     def __init__(self, coordinator: SnmpCoordinator, unit: str) -> None:
         """Initialize a Eaton ePDU entity."""
         super().__init__(coordinator)
