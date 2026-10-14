@@ -4,13 +4,6 @@ The lean unit suite under tests/unit/ stubs the Home Assistant module
 graph itself (see tests/unit/conftest.py) and must not also load the
 pytest-homeassistant-custom-component plugin, whose autouse fixtures
 expect the real HA packages. The plugin registers itself via a pytest11
-entry point ( Loads before ini addopts), so it is blocked here at the
-earliest conftest load stage.
+entry point and loads before ini addopts are applied; run the unit
+suite with PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 (CI's test.yaml does).
 """
-
-
-def pytest_cmdline_main(config):
-    return None  # unused; placeholder so this file always imports cleanly
-
-
-collect_ignore_glob = []  # kept minimal; no directories excluded by default
