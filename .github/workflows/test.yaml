@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install pytest
+        run: pip install pytest
+      - name: Run unit tests (stubbed, no HA install)
+        run: python -m pytest tests/unit -q
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install HA custom-component test harness
+        run: pip install pytest pytest-homeassistant-custom-component
+      - name: Run integration tests (real HA test instance)
+        run: python -m pytest tests/integration -q --asyncio-mode=auto
