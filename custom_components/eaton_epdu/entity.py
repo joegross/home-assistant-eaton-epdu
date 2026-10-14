@@ -62,7 +62,9 @@ class SnmpEntity(CoordinatorEntity[SnmpCoordinator]):
         name = self.coordinator.data.get(name_oid)
         if name in (None, ""):
             return None
-        name = str(name)
+        name = str(name).strip()
+        if name == "":
+            return None
         if re.fullmatch(r"PDU \d+ Outlet [A-Za-z]?\d+[a-z]?", name):
             # Factory default, not a user-provided name.
             return None
