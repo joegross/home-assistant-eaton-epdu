@@ -28,6 +28,6 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install HA custom-component test harness
-        run: pip install pytest pytest-homeassistant-custom-component
+        run: pip install pytest pytest-homeassistant-custom-component pysnmp
       - name: Run integration tests (real HA test instance)
         run: python -m pytest tests/integration -q --asyncio-mode=auto
