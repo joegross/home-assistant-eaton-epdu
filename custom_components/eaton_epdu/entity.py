@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -34,28 +36,47 @@ class SnmpEntity(CoordinatorEntity[SnmpCoordinator]):
     def get_outlet_label(self, index: str) -> str:
         """Return a display label for an outlet.
 
-        Newer ePDUs expose an outlet designator, while older models only expose
-        the outlet name. Prefer the designator to retain the existing entity
-        names, then fall back to the legacy name and finally the outlet index.
+        Preference order:
+
+        1. The outlet name set by the user on the ePDU (outletName), when it
+           is not a factory default like "PDU 0 Outlet A3".
+        2. The outlet designator (physical label, e.g. "A3") for ePDUs whose
+           names have not been customized.
+        3. The outlet index as a last resort.
         """
-        designator_oid = SNMP_OID_OUTLETS_DESIGNATOR.replace(
-            "unit", self._unit
-        ).replace("index", index)
-        designator = self.coordinator.data.get(designator_oid)
+        name = self.get_outlet_name(index)
+        if name is not None:
+            return name
+
+        designator = self.get_outlet_designator(index)
         if designator not in (None, ""):
             return f"Outlet {designator}"
 
+        return f"Outlet {index}"
+
+    def get_outlet_name(self, index: str) -> str | None:
+        """Return the user-defined outlet name, or None when not customized."""
         name_oid = SNMP_OID_OUTLETS_NAME.replace("unit", self._unit).replace(
             "index", index
         )
         name = self.coordinator.data.get(name_oid)
-        if name not in (None, ""):
-            name = str(name)
-            if name.casefold().startswith("outlet "):
-                return name
-            return f"Outlet {name}"
+        if name in (None, ""):
+            return None
+        name = str(name)
+        if re.fullmatch(r"PDU \d+ Outlet [A-Za-z]?\d+[a-z]?", name):
+            # Factory default, not a user-provided name.
+            return None
+        if name.casefold().startswith("outlet "):
+            return name
+        return name
 
-        return f"Outlet {index}"
+    def get_outlet_designator(self, index: str) -> str | None:
+        """Return the outlet designator (physical label), e.g. "A3"."""
+        designator_oid = SNMP_OID_OUTLETS_DESIGNATOR.replace(
+            "unit", self._unit
+        ).replace("index", index)
+        designator = self.get_unit_data(designator_oid)
+        return designator if designator not in (None, "") else None
 
     @property
     def identifier(self):

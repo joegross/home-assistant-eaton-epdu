@@ -6,7 +6,7 @@ import asyncio
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
@@ -58,10 +58,9 @@ class SnmpSwitchEntity(SnmpEntity, SwitchEntity):
     def __init__(self, coordinator: SnmpCoordinator, unit: str, index: str) -> None:
         """Initialize a Eaton ePDU outlet switch."""
         super().__init__(coordinator, unit)
+        self._index = index
         self._value_oid = self._value_oid.replace("unit", unit).replace("index", index)
-        device_name = self.device_info["name"]
-        outlet_label = self.get_outlet_label(index)
-        self._attr_name = f"{device_name} {outlet_label} {self._name_suffix}"
+        self._build_name()
         self._attr_unique_id = f"{DOMAIN}_{self.identifier}_{self._value_oid}"
 
         self._oid_on = SNMP_OID_OUTLETS_SWITCH_ON.replace("unit", unit).replace(
@@ -70,6 +69,19 @@ class SnmpSwitchEntity(SnmpEntity, SwitchEntity):
         self._oid_off = SNMP_OID_OUTLETS_SWITCH_OFF.replace("unit", unit).replace(
             "index", index
         )
+
+    def _build_name(self) -> None:
+        """Assemble the display name from device name and outlet label."""
+        device_name = self.device_info["name"]
+        outlet_label = self.get_outlet_label(self._index)
+        self._attr_name = f"{device_name} {outlet_label} {self._name_suffix}"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        # Pick up a rename done on the ePDU web UI without changing entity_id.
+        self._build_name()
+        super()._handle_coordinator_update()
 
     @property
     def is_on(self) -> bool:

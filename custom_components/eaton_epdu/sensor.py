@@ -226,9 +226,32 @@ class SnmpOutletSensorEntity(SnmpSensorEntity, SensorEntity):
 
     _name_oid = SNMP_OID_OUTLETS_DESIGNATOR
 
+    def __init__(self, coordinator: SnmpCoordinator, unit: str, index: str) -> None:
+        """Initialize a Eaton ePDU outlet sensor."""
+        super().__init__(coordinator, unit, index)
+        self._outlet_index = index
+
     def get_sensor_name(self, index: str) -> str:
         """Return the outlet label with support for legacy ePDUs."""
         return self.get_outlet_label(index)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        # Pick up a rename done on the ePDU web UI without changing entity_id.
+        device_name = self.device_info["name"]
+        sensor_name = self.get_sensor_name(self._outlet_index)
+        self._attr_name = " ".join(
+            str(component)
+            for component in (
+                device_name,
+                self._name_prefix,
+                sensor_name,
+                self._name_suffix,
+            )
+            if component not in (None, "")
+        )
+        super()._handle_coordinator_update()
 
 
 class SnmpOutletCurrentSensorEntity(SnmpOutletSensorEntity, SensorEntity):
