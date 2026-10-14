@@ -273,9 +273,8 @@ class SnmpApi:
         start_from=1,
     ) -> list:
         """Get table data for given OIDs with determined rown count."""
-        return await self.get_bulk(
-            oids, await self.get([count_oid])[count_oid], start_from
-        )
+        count = (await self.get([count_oid]))[count_oid]
+        return await self.get_bulk(oids, count, start_from)
 
     @staticmethod
     def cast(value):
